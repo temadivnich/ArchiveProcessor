@@ -21,41 +21,31 @@ public class AnotherZip {
 
 class Test {
     public void main() throws Exception {
-        File archive = new File("./folder/inputs_v2.zip");
+        File archive = new File("./inputs_v2.zip");
         FileInputStream fis = new FileInputStream(archive);
         ZipInputStream zis = new ZipInputStream(fis);
         readZip(zis);
     }
 
-    public void readZip(InputStream is) throws Exception {
-        ZipInputStream zis;
-        if (is instanceof ZipInputStream) {
-            ZipEntry zipEntry = null;
-            zis = (ZipInputStream) is;
-            while ((zipEntry = zis.getNextEntry()) != null) {
-                String name = zipEntry.getName();
-                System.out.println("Next entry:\t" + (zipEntry.isDirectory() ? "Dir: \t" : "File:\t") + name);
+    public void readZip(ZipInputStream zis) throws Exception {
+        ZipEntry zipEntry = null;
+        while ((zipEntry = zis.getNextEntry()) != null) {
+            String name = zipEntry.getName();
+            System.out.println("Next entry \t" + (zipEntry.isDirectory() ? "Dir: \t" : "File:\t") + name);
 
-                if (zipEntry.isDirectory()) {
-                    readZip(zis);
-                }
-                if (!zipEntry.isDirectory() && name.endsWith(".zip")) {
-                    ZipInputStream zippedZis = new ZipInputStream(zis);
-                    readZip(zippedZis);
-                }
-                if (!zipEntry.isDirectory() && name.endsWith(".txt")) {
-//                    readTxtFile(zis);
-                    readWithScanner(zis);
-                }
-                if (!zipEntry.isDirectory() && name.endsWith(".gz")) {
-                    GZIPInputStream gzipped = new GZIPInputStream(zis);
-                    readZip(gzipped);
-                }
+            if (name.endsWith(".zip")) {
+                ZipInputStream zippedZis = new ZipInputStream(zis);
+                readZip(zippedZis);
             }
-        }
-        if (is instanceof GZIPInputStream) {
-//            readTxtFile(is);
-            readWithScanner(is);
+            if (name.endsWith(".txt")) {
+                readTxtFile(zis);
+//                    readWithScanner(zis);
+            }
+            if (name.endsWith(".gz")) {
+                GZIPInputStream gzipped = new GZIPInputStream(zis);
+                readTxtFile(gzipped);
+//                    readWithScanner(zis);
+            }
         }
     }
 
@@ -64,7 +54,8 @@ class Test {
         int cnt = 0;
         try {
             while (it.hasNext()) {
-                it.nextLine();
+                String s = it.nextLine();
+                if (cnt == 0) System.out.println("\t" + s);
                 cnt++;
             }
         } finally {
