@@ -3,12 +3,8 @@ package com.tutorials;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.LineIterator;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.nio.charset.Charset;
-import java.util.Scanner;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -24,8 +20,31 @@ class Test {
         File archive = new File("./inputs_v2.zip");
         FileInputStream fis = new FileInputStream(archive);
         ZipInputStream zis = new ZipInputStream(fis);
+
         readZip(zis);
+
+        zis.close();
+        fis.close();
     }
+
+    public File readAndWrite(InputStream is) throws Exception {
+        File output = new File("inputs_v2 - Copy.zip");
+        FileOutputStream os = new FileOutputStream(output);
+
+        byte[] buff = new byte[1024 * 1024];
+        int read;
+        try {
+            while ((read = is.read(buff)) != -1) {
+                os.write(buff, 0, read);
+                os.flush();
+            }
+        } catch (IOException e) {
+            //ignore
+        }
+        os.close();
+        return output;
+    }
+
 
     public void readZip(ZipInputStream zis) throws Exception {
         ZipEntry zipEntry = null;
@@ -38,15 +57,30 @@ class Test {
                 readZip(zippedZis);
             }
             if (name.endsWith(".txt")) {
-                readTxtFile(zis);
-//                    readWithScanner(zis);
+                read(zis);
+//                readTxtFile(zis);
             }
             if (name.endsWith(".gz")) {
                 GZIPInputStream gzipped = new GZIPInputStream(zis);
-                readTxtFile(gzipped);
-//                    readWithScanner(zis);
+                read(gzipped);
+//                readTxtFile(gzipped);
             }
         }
+    }
+
+    public void read(InputStream is) {
+        InputStreamReader isr = new InputStreamReader(is);
+        char[] buff = new char[1024 * 1024];
+        int read;
+        int cnt = 0;
+        try {
+            while ((read = isr.read(buff)) != -1) {
+                cnt++;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        System.out.println("\tCount: " + cnt);
     }
 
     public void readTxtFile(InputStream inputStream) throws IOException {
@@ -55,7 +89,7 @@ class Test {
         try {
             while (it.hasNext()) {
                 String s = it.nextLine();
-                if (cnt == 0) System.out.println("\t" + s);
+                if (cnt <= 10) System.out.println(s);
                 cnt++;
             }
         } finally {
@@ -64,21 +98,4 @@ class Test {
         }
     }
 
-    public void readWithScanner(InputStream inputStream) throws IOException {
-        Scanner sc = new Scanner(inputStream, "UTF-8");
-        int cnt = 0;
-        while (sc.hasNextLine()) {
-            sc.nextLine();
-            cnt++;
-        }
-        // note that Scanner suppresses exceptions
-        if (sc.ioException() != null) {
-            throw sc.ioException();
-        }
-        System.out.println("\tLines count:\t" + cnt);
-//        finally {
-//            if (sc != null) {
-//                sc.close();
-//            }
-    }
 }
