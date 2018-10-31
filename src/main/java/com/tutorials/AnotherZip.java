@@ -1,13 +1,13 @@
 package com.tutorials;
 
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.io.LineIterator;
-
 import java.io.*;
-import java.nio.charset.Charset;
-import java.util.zip.GZIPInputStream;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
+import java.util.TimerTask;
+import java.util.stream.Collectors;
+import java.util.zip.*;
 
 public class AnotherZip {
     public static void main(String[] args) throws Exception {
@@ -21,32 +21,20 @@ class Test {
         FileInputStream fis = new FileInputStream(archive);
         ZipInputStream zis = new ZipInputStream(fis);
 
-        readZip(zis);
+        File output = new File("inputs_v2 - Copy.zip");
+        FileOutputStream fos = new FileOutputStream(output);
+        ZipOutputStream zos = new ZipOutputStream(fos);
+        zos.putNextEntry(new ZipEntry("inputs_v2 - Copy"));
+        process(zis, zos);
 
         zis.close();
         fis.close();
-    }
-
-    public File readAndWrite(InputStream is) throws Exception {
-        File output = new File("inputs_v2 - Copy.zip");
-        FileOutputStream os = new FileOutputStream(output);
-
-        byte[] buff = new byte[1024 * 1024];
-        int read;
-        try {
-            while ((read = is.read(buff)) != -1) {
-                os.write(buff, 0, read);
-                os.flush();
-            }
-        } catch (IOException e) {
-            //ignore
-        }
-        os.close();
-        return output;
+        zos.close();
+        fos.close();
     }
 
 
-    public void readZip(ZipInputStream zis) throws Exception {
+    public void process(ZipInputStream zis, ZipOutputStream zos) throws Exception {
         ZipEntry zipEntry = null;
         while ((zipEntry = zis.getNextEntry()) != null) {
             String name = zipEntry.getName();
@@ -54,48 +42,83 @@ class Test {
 
             if (name.endsWith(".zip")) {
                 ZipInputStream zippedZis = new ZipInputStream(zis);
-                readZip(zippedZis);
-            }
-            if (name.endsWith(".txt")) {
-                read(zis);
-//                readTxtFile(zis);
+                ZipOutputStream zippedZos = new ZipOutputStream(zos);
+                zippedZos.putNextEntry(zipEntry);
+                process(zippedZis, zippedZos);
             }
             if (name.endsWith(".gz")) {
                 GZIPInputStream gzipped = new GZIPInputStream(zis);
-                read(gzipped);
-//                readTxtFile(gzipped);
+                GZIPOutputStream gzipOut = new GZIPOutputStream(zos);
+                readAndWriteGzip(gzipped, gzipOut, zipEntry);
+                gzipOut.finish();
+            }
+            if (name.endsWith(".txt")) {
+                readAndWriteZip(zis, zos, zipEntry);
+//                zos.closeEntry();
             }
         }
     }
 
-    public void read(InputStream is) {
-        InputStreamReader isr = new InputStreamReader(is);
-        char[] buff = new char[1024 * 1024];
+    public void readAndWriteZip(InputStream is, ZipOutputStream zos, ZipEntry zipEntry) throws Exception {
         int read;
-        int cnt = 0;
+        byte[] buff = new byte[1024 * 1024];
         try {
-            while ((read = isr.read(buff)) != -1) {
-                cnt++;
+            while ((read = is.read(buff)) != -1) {
+                zos.write(buff, 0, read);
+                zos.flush();
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        System.out.println("\tCount: " + cnt);
-    }
-
-    public void readTxtFile(InputStream inputStream) throws IOException {
-        LineIterator it = IOUtils.lineIterator(inputStream, Charset.defaultCharset());
-        int cnt = 0;
-        try {
-            while (it.hasNext()) {
-                String s = it.nextLine();
-                if (cnt <= 10) System.out.println(s);
-                cnt++;
-            }
-        } finally {
-//            LineIterator.closeQuietly(it);
-            System.out.println("\tLines count:\t" + cnt);
+        } catch (IOException e) { //ignore
         }
     }
 
+    public void readAndWriteGzip(InputStream is, GZIPOutputStream gzos, ZipEntry zipEntry) throws Exception {
+        int read;
+        byte[] buff = new byte[1024 * 1024];
+        try {
+            while ((read = is.read(buff)) != -1) {
+                gzos.write(buff, 0, read);
+                gzos.flush();
+            }
+        } catch (IOException e) {  //ignore
+        }
+    }
+
+    private void testCompressFolder() throws Exception {
+        Path path = Paths.get("./folder");
+        List<Path> paths = Files.list(path).collect(Collectors.toList());
+        List<File> files = paths.stream().map(Path::toFile).collect(Collectors.toList());
+//        File file = new File("./folder/phone.txt");
+
+        File output = new File("phone.zip");
+        FileOutputStream fos = new FileOutputStream(output);
+        ZipOutputStream zos = new ZipOutputStream(fos);
+
+        files.forEach(file -> {
+            try {
+                FileInputStream fis = new FileInputStream(file);
+
+                ZipEntry zipEntry = new ZipEntry(file.getName());
+                zos.putNextEntry(zipEntry);
+
+                int read;
+                byte[] buff = new byte[1024 * 1024];
+                while ((read = fis.read(buff)) != -1) {
+                    zos.write(buff, 0, read);
+                }
+                fis.close();
+            } catch (Exception e) { //ignore
+            }
+        });
+        zos.closeEntry();
+        zos.close();
+    }
+
+    class LogMem extends TimerTask {
+        public void run() {
+            System.out.println("freeMemory: " + Runtime.getRuntime().freeMemory() / 1048576);
+            System.out.println("maxMemory: " + Runtime.getRuntime().maxMemory() / 1048576);
+            System.out.println("totalMemory: " + Runtime.getRuntime().totalMemory() / 1048576);
+            System.out.println("=======================================");
+        }
+    }
 }
