@@ -54,7 +54,6 @@ class Test {
             }
             if (name.endsWith(".txt")) {
                 readAndWrite(zis, zos);
-//                zos.closeEntry();
             }
         }
     }
@@ -70,18 +69,6 @@ class Test {
         } catch (IOException e) {
         }
     }
-
-//    public void readAndWriteGzip(InputStream is, OutputStream zos) throws Exception {
-//        int read;
-//        byte[] buff = new byte[1024 * 1024];
-//        try {
-//            while ((read = is.read(buff)) != -1) {
-//                zos.write(buff, 0, read);
-//                zos.flush();
-//            }
-//        } catch (IOException e) {
-//        }
-//    }
 
     private void testCompressFolder() throws Exception {
         Path path = Paths.get("./folder");

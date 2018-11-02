@@ -39,7 +39,7 @@ class ZipProcessor {
                 ZipInputStream zippedZis = new ZipInputStream(zis);
                 ZipOutputStream zippedZos = new ZipOutputStream(zos);
                 process(zippedZis, zippedZos);
-                zippedZos.closeEntry();
+                zippedZos.finish();
             }
             if (name.endsWith(".gz")) {
                 GZIPInputStream gzippedZis = new GZIPInputStream(zis);
@@ -55,7 +55,7 @@ class ZipProcessor {
 
     private void readAndWrite(InputStream is, OutputStream zos) throws Exception {
         int read;
-        byte[] buff = new byte[1024 * 1024 * 5];
+        byte[] buff = new byte[1024 * 1024];
         try {
             while ((read = is.read(buff)) != -1) {
 //                System.out.println("\t" + new String(buff, 0, read));
