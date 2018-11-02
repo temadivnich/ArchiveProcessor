@@ -24,7 +24,7 @@ class Test {
         File output = new File("inputs_v2 - Copy.zip");
         FileOutputStream fos = new FileOutputStream(output);
         ZipOutputStream zos = new ZipOutputStream(fos);
-        zos.putNextEntry(new ZipEntry("inputs_v2 - Copy"));
+        zos.putNextEntry(new ZipEntry("inputs_v2 - Copy/"));
         process(zis, zos);
 
         zis.close();
@@ -49,39 +49,39 @@ class Test {
             if (name.endsWith(".gz")) {
                 GZIPInputStream gzipped = new GZIPInputStream(zis);
                 GZIPOutputStream gzipOut = new GZIPOutputStream(zos);
-                readAndWriteGzip(gzipped, gzipOut, zipEntry);
+                readAndWrite(gzipped, gzipOut);
                 gzipOut.finish();
             }
             if (name.endsWith(".txt")) {
-                readAndWriteZip(zis, zos, zipEntry);
+                readAndWrite(zis, zos);
 //                zos.closeEntry();
             }
         }
     }
 
-    public void readAndWriteZip(InputStream is, ZipOutputStream zos, ZipEntry zipEntry) throws Exception {
+    public void readAndWrite(InputStream is, OutputStream zos) throws Exception {
         int read;
-        byte[] buff = new byte[1024 * 1024];
+        byte[] buff = new byte[1024 * 1024 * 5];
         try {
             while ((read = is.read(buff)) != -1) {
                 zos.write(buff, 0, read);
                 zos.flush();
             }
-        } catch (IOException e) { //ignore
+        } catch (IOException e) {
         }
     }
 
-    public void readAndWriteGzip(InputStream is, GZIPOutputStream gzos, ZipEntry zipEntry) throws Exception {
-        int read;
-        byte[] buff = new byte[1024 * 1024];
-        try {
-            while ((read = is.read(buff)) != -1) {
-                gzos.write(buff, 0, read);
-                gzos.flush();
-            }
-        } catch (IOException e) {  //ignore
-        }
-    }
+//    public void readAndWriteGzip(InputStream is, OutputStream zos) throws Exception {
+//        int read;
+//        byte[] buff = new byte[1024 * 1024];
+//        try {
+//            while ((read = is.read(buff)) != -1) {
+//                zos.write(buff, 0, read);
+//                zos.flush();
+//            }
+//        } catch (IOException e) {
+//        }
+//    }
 
     private void testCompressFolder() throws Exception {
         Path path = Paths.get("./folder");
