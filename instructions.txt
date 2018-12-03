@@ -1,0 +1,13 @@
+JAV02  APavlovskiy
+
+How to execute jar file:
+1. execute command "mvn package" to create jar file
+2. Put inputs_v2.zip in the same location with jar
+3. execute command "java -Xmx8M -jar ${generated-jar-name} ${input-zip-file-name}"
+
+
+How to run from IDE:
+1. open as a new Maven project in IDE
+2. In Run/Debug configuration dialog add VM option: -Xmx8M
+3. In the same dialog add Program argument: ${input-zip-file-name}  e.g. inputs_v2.zip
+4. Run ZipLoader.main() method
