@@ -7,10 +7,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
 
-/**
- * DataArt Jav02 course
- */
-
 public class ZipLoader {
 
     public static void main(String[] args) {
