@@ -1,15 +1,15 @@
 package com.zip.tests;
 
 
-import com.zip.processor.Reporter;
+import com.zip.processor.ReportGenerator;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class ReporterTest {
-    private final Reporter reporter = new Reporter();
+class ReportGeneratorTest {
+    private final ReportGenerator reporter = new ReportGenerator();
     private static List<String> text = List.of(
             "+7 (101) 111-222-11  abc@ert.com, def@sdf.org\n",
             "+1 (102) 123532-2 some@mail.ru\n",

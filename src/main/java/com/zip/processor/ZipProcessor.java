@@ -1,19 +1,18 @@
 package com.zip.processor;
 
+
 import java.io.*;
 import java.util.zip.*;
 
-import static com.zip.processor.StringUtils.replaceExtension;
+import static com.zip.processor.StringConstants.*;
+import static com.zip.processor.Utils.replaceExtension;
 
 /**
  * Responsible for zip processing logic
  */
 
 public class ZipProcessor {
-    private static final String OUTPUT_FILE = "inputsv2.zip";
-    private static final String ZIP_SUFFIX = ".zip";
-    private static final String GZIP_SUFFIX = ".gz";
-    private static Reporter reporter = new Reporter();
+    private static ReportGenerator reporter = new ReportGenerator();
 
     public File process(File inputFile) throws Exception {
         File outputFile = new File(OUTPUT_FILE);
@@ -32,7 +31,7 @@ public class ZipProcessor {
         ZipEntry zipEntry;
         while ((zipEntry = zis.getNextEntry()) != null) {
             String entryName = zipEntry.getName();
-            log("Current entry: " + entryName);
+            System.out.println("Current entry: " + entryName);
 
             zos.putNextEntry(new ZipEntry(entryName));
             if (entryName.endsWith(ZIP_SUFFIX)) {
@@ -41,7 +40,7 @@ public class ZipProcessor {
                 processNestedGzip(zis, zos);
 
             } else if (!zipEntry.isDirectory()) {
-                log("Reading the file: " + entryName);
+                System.out.println("Reading the file: " + entryName);
                 processEndFile(zis, zos);
             }
             zos.closeEntry();
@@ -76,12 +75,5 @@ public class ZipProcessor {
 
             reporter.add(output);
         }
-    }
-
-    private void log(String msg) {
-        if (msg.length() < 400)
-            System.out.println(msg);
-        else
-            System.out.println(msg.substring(0, 400));
     }
 }
