@@ -12,6 +12,7 @@ import static com.zip.processor.Utils.replaceExtension;
  */
 
 public class ZipProcessor {
+    private static final int BUFFER_SIZE = 100;
     private static ReportGenerator reporter = new ReportGenerator();
 
     public File process(File inputFile) throws Exception {
@@ -64,7 +65,7 @@ public class ZipProcessor {
 
     private void processEndFile(InputStream inputStream, OutputStream outputStream) throws IOException {
         var inputStreamReader = new InputStreamReader(inputStream);
-        var reader = new BufferedReader(inputStreamReader);
+        var reader = new BufferedReader(inputStreamReader, BUFFER_SIZE);
         var writer = new PrintWriter(outputStream);
 
         String inputLine;

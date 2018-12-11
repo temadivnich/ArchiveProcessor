@@ -16,10 +16,10 @@ public final class Utils {
 
     static void logResults(Set<String> emails, Set<String> phones) {
         log("File processed successfully");
-        log("Phones list: {} total " + phones.size());
+        log("Phones list, total: " + phones.size());
         phones.forEach(Utils::log);
 
-        log("Emails list: {} total " + emails.size());
+        log("Emails list, total: " + emails.size());
         emails.forEach(Utils::log);
     }
 
